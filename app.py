@@ -18,7 +18,6 @@ def add_event():
 	name = request.json['name']
 	timestamp = request.json['timestamp']
 	event_id = view_events.insert({'user_id': user_id, 'name': name, 'timestamp': timestamp})
-	new_event = view_events.find_one({'_id': event_id })
 	output = {'user_id': new_event['user_id'], 'name' : new_event['name'], 'timestamp' : new_event['timestamp']}
 	return jsonify({'result' : output})
 
@@ -27,9 +26,11 @@ def view_user(user_id):
 	view_events = mongo.db.view_events
 	timestamp = (datetime.datetime.now() - datetime.timedelta(days=7)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
 	views = view_events.find({'timestamp' : { '$gt' : timestamp }, 'user_id' : user_id})
-	if not views:
+	if views.count() == 0:
+		# If no result, return unknown user
 		return jsonify({'result' : { 'views' : 'Unknown User' }})
 	else:
+		# If result, iterate over records and have logic to aggregate
 		pages = {}
 		page_count = 0
 		max_page = {'page_name_max' : '', 'view_count_max' : 0}
@@ -43,6 +44,16 @@ def view_user(user_id):
 				max_page['page_name_max'] = doc['name']
 				max_page['view_count_max'] = pages[doc['name']]
 		return jsonify({'result' : { 'user_id' : user_id , 'number_pages_viewed_the_last_7_days' : page_count, 'most_viewed_page_last_7_days' : max_page['page_name_max']}})
+
+@app.route('/user/<user_id>', methods=['DELETE'])
+def delete_user(user_id):
+	view_events = mongo.db.view_events
+	view_events.remove({'user_id' : user_id})
+	view_test = view_events.find_one({'user_id' : user_id })
+	if not view_test:
+		return jsonify({'result' : 'The records were deleted'})
+	else:
+		return jsonify({'result' : 'Records could not be deleted, oupsie'})
 
 if __name__ == '__main__':
 	app.run(debug=True)

@@ -18,8 +18,7 @@ def add_event():
 	name = request.json['name']
 	timestamp = request.json['timestamp']
 	event_id = view_events.insert({'user_id': user_id, 'name': name, 'timestamp': timestamp})
-	output = {'user_id': new_event['user_id'], 'name' : new_event['name'], 'timestamp' : new_event['timestamp']}
-	return jsonify({'result' : output})
+	return jsonify({'result' : {'user_id': user_id, 'name': name, 'timestamp': timestamp}})
 
 @app.route('/user/<user_id>', methods=['GET'])
 def view_user(user_id):

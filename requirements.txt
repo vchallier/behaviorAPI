@@ -1,0 +1,8 @@
+name: behaviorAPI
+channels:
+- defaults
+dependencies:
+- flask=1.0.2=py36_1
+- pymongo=3.4.0=py36_0
+prefix: /Users/victorchallier/anaconda3/envs/behaviorAPI
+
